@@ -33,7 +33,7 @@ namespace spacelatino
             
             // aca se puede agregar codigo para que chequee faccion y no permita grindear
             //  o dañar un bloque de un grid enemigo, pero si destruirlo con armamento
-
+            // Comentario de prueba DSM #1, solo para test de COMMIT.
                 
                       removing = true;
                        
