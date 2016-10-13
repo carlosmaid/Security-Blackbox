@@ -9,7 +9,6 @@ using VRage.Game;
 using VRage.Game.Components;
 using VRage.Game.ModAPI;
 using VRage.ModAPI;
-
 using SpaceEngineers.Game.ModAPI;
 using VRage.ObjectBuilders;
 using VRageMath;
@@ -66,7 +65,8 @@ namespace spacelatino
 
 
          public static bool isActiveBeaconSecurity(IMyCubeGrid grid)
-             
+             // esta funcion devuelve true si el beacon de seguridad esta presente
+             //  en el grid y esta a nombre de un jugador y esta enecendido.
          {
              if (grid == null)
                  return false;
@@ -79,8 +79,8 @@ namespace spacelatino
              foreach (var block in blocks)
              {
                 Exchangerlogic bs = block.GameLogic as Exchangerlogic;
-                 if (bs != null && bs.IsBeaconSecurity && bs.OwnerId != 0 && bs.IsPowered) //&& bs.IsWorking modificado
-                     return true; // one beacon removed, one more stay - nothing to do...
+                 if (bs != null && bs.IsBeaconSecurity && bs.OwnerId != 0 && bs.IsPowered) 
+                     return true;
              }
              return false;
          }

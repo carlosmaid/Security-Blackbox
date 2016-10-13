@@ -4,15 +4,11 @@ using System;
 using VRage.Game.ModAPI;
 using VRage.Game;
 using VRage.ModAPI;
-
-
 using Sandbox.Common.ObjectBuilders;
 using Sandbox.Definitions;
 using System.Collections.Generic;
 using System.Linq;
-
 using VRage.Game.Components;
-
 using SpaceEngineers.Game.ModAPI;
 using VRage.ObjectBuilders;
 using VRageMath;
@@ -34,11 +30,10 @@ namespace spacelatino
                     return;
 
                 bool removing = false;
-            //
-            //
+            
+            // aca se puede agregar codigo para que chequee faccion y no permita grindear
+            //  o dañar un bloque de un grid enemigo, pero si destruirlo con armamento
 
-
-         
                 
                       removing = true;
                        
@@ -54,8 +49,8 @@ namespace spacelatino
          public static void BeforeDamageHandler(object target, ref MyDamageInformation info)
         {
 
-            MyAPIGateway.Utilities.ShowNotification("grindeando", 2000, MyFontEnum.Green);
-            return; // modificacion para que puedas grindear enemigos
+            MyAPIGateway.Utilities.ShowNotification("grindeando bloque", 2000, MyFontEnum.Green);
+            return; 
 
         }
     }
