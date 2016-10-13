@@ -14,7 +14,7 @@ using SpaceEngineers.Game.ModAPI;
 using VRage.ObjectBuilders;
 using VRageMath;
 
-namespace carlos
+namespace spacelatino
 {
      [MySessionComponentDescriptor(MyUpdateOrder.BeforeSimulation)]
     public class Session : MySessionComponentBase
