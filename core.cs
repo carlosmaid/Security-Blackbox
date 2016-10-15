@@ -89,6 +89,7 @@ namespace spacelatino
             }
 
             // si esta a menos de 3 metros
+            
            if ((MyAPIGateway.Session.Player.GetPosition() - Entity.GetPosition()).Length() < 3f)
             {
               // si no fue saludado, tiene energia y esta a nombre de alguien
