@@ -54,7 +54,7 @@ namespace spacelatino
                         IMyCubeGrid grid = entity as IMyCubeGrid;
                         if (grid == null)
                             continue;
-                        grid.OnBlockAdded += BuildHandler.grid_OnBlockAdded;
+                        grid.OnBlockAdded += BuildHandler.OnBlockAdded;
                                                     
                         
                     }
@@ -79,7 +79,7 @@ namespace spacelatino
              foreach (var block in blocks)
              {
                 Exchangerlogic bs = block.GameLogic as Exchangerlogic;
-                 if (bs != null && bs.IsBeaconSecurity && bs.OwnerId != 0 && bs.IsPowered) 
+                 if (bs != null && bs.IsBeaconSecurity && bs.OwnerId != 0 && bs.IsPowered)
                      return true;
              }
              return false;

@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="buildhandler.cs" />
+    <Compile Include="logeer.cs" />
     <Compile Include="session.cs" />
     <Compile Include="core.cs" />
   </ItemGroup>
