@@ -14,13 +14,54 @@ using VRage.ObjectBuilders;
 using VRageMath;
 
 
+using System.Text.RegularExpressions;
+
+
+
 
 namespace spacelatino
-
+     
 {
     class BuildHandler
     {
-        
+     
+        public static void OnBlockAdded(IMySlimBlock block)
+        {
+
+            // On récupère la position du block
+            // Recupera la posicion de un bloque
+            VRageMath.Vector3D position;
+            block.ComputeWorldCenter(out position);
+
+            // Création de la sphère
+            // Creacion de la esfera
+            VRageMath.BoundingSphereD sphere = new VRageMath.BoundingSphereD(position, 10);
+
+            // Recherche des joueurs présent dans la sphère
+            // Busca jugadores en la esfera
+            List<IMyPlayer> players = new List<IMyPlayer>();
+            MyAPIGateway.Players.GetPlayers(players, p => sphere.Contains(p.GetPosition()) == VRageMath.ContainmentType.Contains);
+
+  
+            foreach (IMyPlayer player in players)
+            {
+
+           
+                // y comprueba si el beacon esta a nombre del jugador o de la faccion
+                
+             //  MyRelationsBetweenPlayerAndBlock relation = block.GetUserRelationToOwner(player.PlayerID);
+               // if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare)
+
+                    continue;
+                // si el jugador es de la faccion entonces:
+
+                // muestra un mensaje si el que construye no es el owner
+                MyAPIGateway.Utilities.ShowMissionScreen("Titulo", "subtitulo", "", "Bla bla bla...");
+            }
+
+        }
+
+        /*
         public static void grid_OnBlockAdded(IMySlimBlock obj)
         {
 
@@ -45,6 +86,7 @@ namespace spacelatino
                 }
             
         }
+         */
 
          public static void BeforeDamageHandler(object target, ref MyDamageInformation info)
         {

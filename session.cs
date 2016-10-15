@@ -54,7 +54,7 @@ namespace spacelatino
                         IMyCubeGrid grid = entity as IMyCubeGrid;
                         if (grid == null)
                             continue;
-                        grid.OnBlockAdded += BuildHandler.grid_OnBlockAdded;
+                        grid.OnBlockAdded += BuildHandler.OnBlockAdded;
                                                     
                         
                     }
