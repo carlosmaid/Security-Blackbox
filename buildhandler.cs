@@ -34,7 +34,7 @@ namespace spacelatino
                 if (grid == null)
                     return;
 
-                bool removing = false;
+                
 
 
 
@@ -55,19 +55,31 @@ namespace spacelatino
               foreach (IMyPlayer player in players)
             {
 
-                                  
+                bool removing = false;
+                IMyFunctionalBlock targetFunctionalBlock = block.FatBlock as IMyFunctionalBlock;
+            
+                MyRelationsBetweenPlayerAndBlock relation = targetFunctionalBlock.GetUserRelationToOwner(player.PlayerID);
 
-            }
-                      removing = true;
-                       
-                if (removing)
-                {
-                    (grid as IMyCubeGrid).RemoveBlock(block, true);
-                    if (block.FatBlock != null)
-                        block.FatBlock.Close();
-                }
+
+               // y comprueba si el beacon esta a nombre del jugador o de la faccion
+              if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare)
+                  MyAPIGateway.Utilities.ShowNotification("sos owner", 2000, MyFontEnum.Green);
+
+               //    (grid as IMyCubeGrid).RemoveBlock(block, true);
+                 //   if (block.FatBlock != null)
+                 //       block.FatBlock.Close();
+              
+              
+              
+              }
+                                
             
         }
+                     
+                       
+                
+        
+    
          
 
          public static void BeforeDamageHandler(object target, ref MyDamageInformation info)
