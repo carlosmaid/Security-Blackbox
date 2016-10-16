@@ -96,6 +96,7 @@ namespace spacelatino
                if (!m_greeted && IsPowered && m_block.OwnerId != 0)
                 {
                    // Itera por todos los players 
+                  
                    List<IMyPlayer> players = new List<IMyPlayer>();
                 MyAPIGateway.Players.GetPlayers(players, x => x.Controller != null && x.Controller.ControlledEntity != null);
                 foreach (IMyPlayer player in players)
@@ -105,6 +106,8 @@ namespace spacelatino
                     if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare)
                         continue;
                     // si el jugador es de la faccion entonces:
+
+
 
                     // muestra un mensaje
                     MyAPIGateway.Utilities.ShowMissionScreen("Titulo", "subtitulo", "", "Bla bla bla...");

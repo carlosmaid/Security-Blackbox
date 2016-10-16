@@ -1,5 +1,7 @@
-﻿ using System;
+﻿using System;
 using Sandbox.ModAPI;
+
+// Thanks to elsephire for this logger
 
 class myLogger
 {
