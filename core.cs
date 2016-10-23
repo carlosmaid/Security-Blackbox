@@ -17,7 +17,7 @@ public class SecurityCore : MyGameLogicComponent
     private MyObjectBuilder_EntityBase builder;
 
     private static string messageNotposeEN = "Cant build over a grid with an active security core, destroy it first !";
-    private static string messageNotposeFR = "Impossible de poser un block sur cette structure, detruiser l'active security core d'abord !";
+    private static string messageNotposeFR = "Impossible de poser un bloc sur cette structure, détruisez l'active security core d'abord !";
     private static string messageNotposeES = "No puedes construir sobre un grid enemigo con un security core activo, destruye el core primero !";
 
     public override void Init(MyObjectBuilder_EntityBase objectBuilder)
