@@ -11,7 +11,7 @@ using VRage;
 
 // Very thanks to Elsephire from Le grande nuage de magellan server for helping me with this mod.
 
-[MyEntityComponentDescriptor(typeof(MyObjectBuilder_Beacon))] //MyObjectBuilder_CubeGrid
+[MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubeGrid))]
 public class SecurityCore : MyGameLogicComponent
 {
     private MyObjectBuilder_EntityBase builder;
@@ -94,7 +94,17 @@ public class SecurityCore : MyGameLogicComponent
                 {
                     foreach (IMyPlayer player in players)
                     {
-                        MyLogger.logger(player.DisplayName + "a essayé de poser un block sur une cubegrid qui ne lui appartient pas"); // logger debug
+                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                        {
+                            if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+
+                            else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain)
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                            else
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
+                        }
+                        MyLogger.logger(player.DisplayName + "a essaye de poser un block sur une cubegrid qui ne lui appartient pas"); // logger debug
                     }
 
                     (grid as IMyCubeGrid).RemoveBlock(block, true);
@@ -110,7 +120,7 @@ public class SecurityCore : MyGameLogicComponent
         {
             try
             {
-                //MyLogger.logger("One block added"); // logger debug
+                MyLogger.logger("One block added"); // logger debug
 
                 IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
                 IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
