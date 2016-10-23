@@ -74,10 +74,10 @@
     <Folder Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="buildhandler.cs" />
-    <Compile Include="logeer.cs" />
-    <Compile Include="session.cs" />
     <Compile Include="core.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Borrador.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
