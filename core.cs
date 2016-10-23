@@ -4,32 +4,10 @@ using VRage.ModAPI;
 using VRage.ObjectBuilders;
 using System.Collections.Generic;
 using VRage.Game.ModAPI;
-using System.Text.RegularExpressions;
 using VRage.Game;
-
-using System;
-using System.Text;
-
-using Sandbox.ModAPI.Interfaces;
-using Sandbox.Common;
 using Sandbox.Common.ObjectBuilders;
-using Sandbox.Common.ObjectBuilders.Definitions;
-using Sandbox.Game;
-using Sandbox.Game.Entities;
-using Sandbox.Game.Entities.Blocks;
-using Sandbox.Game.Entities.Character;
-using Sandbox.Game.World;
-using Sandbox.Definitions;
-using Sandbox.Engine;
-using SpaceEngineers.ObjectBuilders;
-using SpaceEngineers.ObjectBuilders.Definitions;
-using SpaceEngineers;
-using SpaceEngineers.Game;
+using System;
 using VRage;
-using VRage.Game.Entity;
-using VRage.Game.ObjectBuilders;
-using SpaceEngineers.Game.ModAPI;
-using VRageMath;
 
 // Very thanks to Elsephire from Le grande nuage de magellan server for helping me with this mod.
 
@@ -37,6 +15,10 @@ using VRageMath;
 public class SecurityCore : MyGameLogicComponent
 {
     private MyObjectBuilder_EntityBase builder;
+
+    private static string messageNotposeEN = "Cant build over a grid with an active security core, destroy it first !";
+    private static string messageNotposeFR = "Impossible de poser un block sur cette structure, detruiser l'active security core d'abord !";
+    private static string messageNotposeES = "No puedes construir sobre un grid enemigo con un security core activo, destruye el core primero !";
 
     public override void Init(MyObjectBuilder_EntityBase objectBuilder)
     {
@@ -48,7 +30,7 @@ public class SecurityCore : MyGameLogicComponent
     {
         return copy ? builder.Clone() as MyObjectBuilder_EntityBase : builder;
     }
-      
+
     public override void UpdateOnceBeforeFrame()
     {
         base.UpdateOnceBeforeFrame();
@@ -57,58 +39,106 @@ public class SecurityCore : MyGameLogicComponent
 
     public static void OnBlockAdded(IMySlimBlock block)
     {
-
-        IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
-        if (grid == null)
-            return;
-
-        
-        // On récupère la position du block
-        VRageMath.Vector3D position;
-        block.ComputeWorldCenter(out position);
-            
-        // Création de la sphère
-        VRageMath.BoundingSphereD sphere = new VRageMath.BoundingSphereD(position, 15);
-            
-        // Recherche des joueurs présent dans la sphère
-        List<IMyPlayer> players = new List<IMyPlayer>();
-        MyAPIGateway.Players.GetPlayers(players, p => sphere.Contains(p.GetPosition()) == VRageMath.ContainmentType.Contains);
-
-     IMyGridTerminalSystem gridTerminal = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(grid);
-     IMyCubeBlock targetFunctionalBlock = block.FatBlock as IMyCubeBlock;
-
-        foreach (IMyPlayer player in players)
+        // Server
+        if (MyAPIGateway.Multiplayer.IsServer)
         {
-             List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-             gridTerminal.GetBlocks(blocks);
-             foreach (var blc in blocks)
-             {
+            try
+            {
+                //MyLogger.logger("One block added"); // logger debug
 
-                  if (blc is IMyBeacon && blc.IsWorking){
-                                            
-                 MyRelationsBetweenPlayerAndBlock relation = blc.GetUserRelationToOwner(player.PlayerID);
+                IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
 
-                      // y comprueba si el bloque esta a nombre del jugador o de la faccion
-                     if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare && relation != MyRelationsBetweenPlayerAndBlock.NoOwnership)
-                     {
-                         MyAPIGateway.Utilities.ShowNotification("cant build over a grid with an active security core, destroy it first", 2000, MyFontEnum.Red);
-                         
-                         (grid as IMyCubeGrid).RemoveBlock(block, true);
-                         if (block.FatBlock != null)
-                             block.FatBlock.Close();
-                     
-                     }
+                if (grid == null)
+                    return;
 
-                  }
+                // Get position of the block
+                VRageMath.Vector3D position;
+                block.ComputeWorldCenter(out position);
 
-             }
-            
+                // create the sphere
+                VRageMath.BoundingSphereD sphere = new VRageMath.BoundingSphereD(position, 15);
+
+                // find all players in the sphere
+                List<IMyPlayer> players = new List<IMyPlayer>();
+                MyAPIGateway.Players.GetPlayers(players, p => sphere.Contains(p.GetPosition()) == VRageMath.ContainmentType.Contains);
+
+                IMyGridTerminalSystem gridTerminal = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(grid);
+                IMyCubeBlock targetFunctionalBlock = block.FatBlock as IMyCubeBlock;
+
+                foreach (IMyPlayer player in players)
+                {
+                    List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
+                    gridTerminal.GetBlocks(blocks);
+
+                    foreach (var blc in blocks)
+                    {
+                        if (blc is IMyBeacon && blc.IsWorking)
+                        {
+                            MyRelationsBetweenPlayerAndBlock relation = blc.GetUserRelationToOwner(player.PlayerID);
+
+                            // y comprueba si el bloque esta a nombre del jugador o de la faccion
+                            if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare && relation != MyRelationsBetweenPlayerAndBlock.NoOwnership)
+                            {
+                                MyLogger.logger(player.DisplayName + "received this " + "'Cant build over a grid with an active security core, destroy it first' in his own language"); // logger debug
+                                //MyAPIGateway.Utilities.ShowNotification("Cant build over a grid with an active security core, destroy it first", 5000, MyFontEnum.Red);
+                                (grid as IMyCubeGrid).RemoveBlock(block, true);
+
+                                if (block.FatBlock != null)
+                                {
+                                    block.FatBlock.Close();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MyLogger.logger("OnBlockAdded->Exception : " + e.ToString());
+            }
+        }
+        // Client
+        else
+        {
+            try
+            {
+                //MyLogger.logger("One block added"); // logger debug
+
+                IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
+
+                if (grid == null)
+                    return;
+
+                IMyGridTerminalSystem gridTerminal = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(grid);
+                IMyCubeBlock targetFunctionalBlock = block.FatBlock as IMyCubeBlock;
+
+                List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
+                gridTerminal.GetBlocks(blocks);
+
+                foreach (var blc in blocks)
+                {
+                    if (blc is IMyBeacon && blc.IsWorking)
+                    {
+                        MyRelationsBetweenPlayerAndBlock relation = blc.GetUserRelationToOwner(MyAPIGateway.Session.LocalHumanPlayer.PlayerID);
+
+                        // y comprueba si el bloque esta a nombre del jugador o de la faccion
+                        if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare && relation != MyRelationsBetweenPlayerAndBlock.NoOwnership)
+                        {
+                            if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+
+                            else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain)
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                            else
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
+                        }
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MyLogger.logger("OnBlockAdded->Exception : " + e.ToString());
+            }
         }
     }
-
 }
-
-    
-  
- 
-
