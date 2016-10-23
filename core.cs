@@ -62,34 +62,42 @@ public class SecurityCore : MyGameLogicComponent
                 List<IMyPlayer> players = new List<IMyPlayer>();
                 MyAPIGateway.Players.GetPlayers(players, p => sphere.Contains(p.GetPosition()) == VRageMath.ContainmentType.Contains);
 
-                IMyGridTerminalSystem gridTerminal = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(grid);
-                IMyCubeBlock targetFunctionalBlock = block.FatBlock as IMyCubeBlock;
+                bool isFriendly = false;
 
                 foreach (IMyPlayer player in players)
                 {
-                    List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-                    gridTerminal.GetBlocks(blocks);
-
-                    foreach (var blc in blocks)
+                    foreach (long owner in grid.BigOwners)
                     {
-                        if (blc is IMyBeacon && blc.IsWorking)
+                        if (player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.FactionShare || player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.Owner)
                         {
-                            MyRelationsBetweenPlayerAndBlock relation = blc.GetUserRelationToOwner(player.PlayerID);
-
-                            // y comprueba si el bloque esta a nombre del jugador o de la faccion
-                            if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare && relation != MyRelationsBetweenPlayerAndBlock.NoOwnership)
-                            {
-                                MyLogger.logger(player.DisplayName + "received this " + "'Cant build over a grid with an active security core, destroy it first' in his own language"); // logger debug
-                                //MyAPIGateway.Utilities.ShowNotification("Cant build over a grid with an active security core, destroy it first", 5000, MyFontEnum.Red);
-                                (grid as IMyCubeGrid).RemoveBlock(block, true);
-
-                                if (block.FatBlock != null)
-                                {
-                                    block.FatBlock.Close();
-                                }
-                            }
+                            isFriendly = true;
                         }
                     }
+                }
+
+                List<IMySlimBlock> slimBlocks = new List<IMySlimBlock>();
+
+                grid.GetBlocks(slimBlocks, b => b.FatBlock != null && b.FatBlock is IMyCubeBlock && b.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon) 
+                    && b.FatBlock.BlockDefinition.SubtypeId.Contains("BlockSecurityBlackbox") && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsFunctional && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsWorking);
+
+                bool haveBLCFonctional = false;
+
+                foreach (IMySlimBlock oneBlock in slimBlocks)
+                {
+                    if (((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsWorking && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsFunctional)
+                    {
+                        haveBLCFonctional = true;
+                    }
+                }
+
+                if (haveBLCFonctional && !isFriendly)
+                {
+                    foreach (IMyPlayer player in players)
+                    {
+                        MyLogger.logger(player.DisplayName + "a essayé de poser un block sur une cubegrid qui ne lui appartient pas"); // logger debug
+                    }
+
+                    (grid as IMyCubeGrid).RemoveBlock(block, true);
                 }
             }
             catch (Exception e)
@@ -105,34 +113,43 @@ public class SecurityCore : MyGameLogicComponent
                 //MyLogger.logger("One block added"); // logger debug
 
                 IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
+                IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
 
-                if (grid == null)
+                if (grid == null || player == null)
                     return;
 
-                IMyGridTerminalSystem gridTerminal = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(grid);
-                IMyCubeBlock targetFunctionalBlock = block.FatBlock as IMyCubeBlock;
-
-                List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-                gridTerminal.GetBlocks(blocks);
-
-                foreach (var blc in blocks)
+                bool isFriendly = false;
+                foreach (long owner in grid.BigOwners)
                 {
-                    if (blc is IMyBeacon && blc.IsWorking)
+                    if (player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.FactionShare || player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.Owner)
                     {
-                        MyRelationsBetweenPlayerAndBlock relation = blc.GetUserRelationToOwner(MyAPIGateway.Session.LocalHumanPlayer.PlayerID);
-
-                        // y comprueba si el bloque esta a nombre del jugador o de la faccion
-                        if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare && relation != MyRelationsBetweenPlayerAndBlock.NoOwnership)
-                        {
-                            if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
-                                MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
-
-                            else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain)
-                                MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
-                            else
-                                MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
-                        }
+                        isFriendly = true;
                     }
+                }
+
+                List<IMySlimBlock> slimBlocks = new List<IMySlimBlock>();
+                grid.GetBlocks(slimBlocks, b => b.FatBlock != null && b.FatBlock is IMyCubeBlock && b.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon)
+                    && b.FatBlock.BlockDefinition.SubtypeId.Contains("BlockSecurityBlackbox") && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsFunctional && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsWorking);
+
+                bool haveBLCFonctional = false;
+                foreach (IMySlimBlock oneBlock in slimBlocks)
+                {
+                    if (((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsWorking && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsFunctional)
+                    {
+                        haveBLCFonctional = true;
+                        break;
+                    }
+                }
+
+                if (haveBLCFonctional && !isFriendly)
+                {
+                    if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
+                        MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+
+                    else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain)
+                        MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                    else
+                        MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
                 }
             }
             catch (Exception e)
