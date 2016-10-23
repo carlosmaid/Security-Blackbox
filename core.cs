@@ -7,8 +7,34 @@ using VRage.Game.ModAPI;
 using System.Text.RegularExpressions;
 using VRage.Game;
 
-[MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubeGrid))]
-public class RenameCubeGrid : MyGameLogicComponent
+using System;
+using System.Text;
+
+using Sandbox.ModAPI.Interfaces;
+using Sandbox.Common;
+using Sandbox.Common.ObjectBuilders;
+using Sandbox.Common.ObjectBuilders.Definitions;
+using Sandbox.Game;
+using Sandbox.Game.Entities;
+using Sandbox.Game.Entities.Blocks;
+using Sandbox.Game.Entities.Character;
+using Sandbox.Game.World;
+using Sandbox.Definitions;
+using Sandbox.Engine;
+using SpaceEngineers.ObjectBuilders;
+using SpaceEngineers.ObjectBuilders.Definitions;
+using SpaceEngineers;
+using SpaceEngineers.Game;
+using VRage;
+using VRage.Game.Entity;
+using VRage.Game.ObjectBuilders;
+using SpaceEngineers.Game.ModAPI;
+using VRageMath;
+
+// Very thanks to Elsephire from Le grande nuage de magellan server for helping me with this mod.
+
+[MyEntityComponentDescriptor(typeof(MyObjectBuilder_Beacon))] //MyObjectBuilder_CubeGrid
+public class SecurityCore : MyGameLogicComponent
 {
     private MyObjectBuilder_EntityBase builder;
 
@@ -22,11 +48,11 @@ public class RenameCubeGrid : MyGameLogicComponent
     {
         return copy ? builder.Clone() as MyObjectBuilder_EntityBase : builder;
     }
-
+      
     public override void UpdateOnceBeforeFrame()
     {
         base.UpdateOnceBeforeFrame();
-        ((IMyCubeGrid)Entity).OnBlockAdded += RenameCubeGrid.OnBlockAdded;
+        ((IMyCubeGrid)Entity).OnBlockAdded += SecurityCore.OnBlockAdded;
     }
 
     public static void OnBlockAdded(IMySlimBlock block)
@@ -49,7 +75,6 @@ public class RenameCubeGrid : MyGameLogicComponent
         MyAPIGateway.Players.GetPlayers(players, p => sphere.Contains(p.GetPosition()) == VRageMath.ContainmentType.Contains);
 
      IMyGridTerminalSystem gridTerminal = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(grid);
-       
      IMyCubeBlock targetFunctionalBlock = block.FatBlock as IMyCubeBlock;
 
         foreach (IMyPlayer player in players)
@@ -60,13 +85,14 @@ public class RenameCubeGrid : MyGameLogicComponent
              {
 
                   if (blc is IMyBeacon && blc.IsWorking){
-                      
-                 MyRelationsBetweenPlayerAndBlock relation = blc.GetUserRelationToOwner(player.PlayerID); //(player.PlayerID)
+                                            
+                 MyRelationsBetweenPlayerAndBlock relation = blc.GetUserRelationToOwner(player.PlayerID);
 
                       // y comprueba si el bloque esta a nombre del jugador o de la faccion
                      if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare && relation != MyRelationsBetweenPlayerAndBlock.NoOwnership)
                      {
                          MyAPIGateway.Utilities.ShowNotification("cant build over a grid with an active security core, destroy it first", 2000, MyFontEnum.Red);
+                         
                          (grid as IMyCubeGrid).RemoveBlock(block, true);
                          if (block.FatBlock != null)
                              block.FatBlock.Close();
