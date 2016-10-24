@@ -154,12 +154,20 @@ public class SecurityCore : MyGameLogicComponent
                 if (haveBLCFonctional && !isFriendly)
                 {
                     if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
+                    {
+                        MyLogger.logger(messageNotposeFR); // logger debug
                         MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
-
+                    }
                     else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain)
+                    {
+                        MyLogger.logger(messageNotposeES); // logger debug
                         MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                    }
                     else
+                    {
+                        MyLogger.logger(messageNotposeEN); // logger debug
                         MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
+                    }
                 }
             }
             catch (Exception e)

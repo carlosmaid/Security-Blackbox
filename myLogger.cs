@@ -8,7 +8,7 @@ public class MyLogger
 
     public static void resetLogger()
     {
-        var m_write = MyAPIGateway.Utilities.WriteFileInLocalStorage("log", typeof(MyLogger));
+        var m_write = MyAPIGateway.Utilities.WriteFileInLocalStorage("logger.log", typeof(MyLogger));
         m_write.Write("");
         m_write.Close();
     }
@@ -21,9 +21,9 @@ public class MyLogger
             if ((DateTime.Now - lastLog).TotalSeconds > 5)
             {
                 string buff = "";
-                if (MyAPIGateway.Utilities.FileExistsInLocalStorage("log", typeof(MyLogger)))
+                if (MyAPIGateway.Utilities.FileExistsInLocalStorage("logger.log", typeof(MyLogger)))
                 {
-                    var m_reader = MyAPIGateway.Utilities.ReadFileInLocalStorage("log", typeof(MyLogger));
+                    var m_reader = MyAPIGateway.Utilities.ReadFileInLocalStorage("logger.log", typeof(MyLogger));
                     buff += m_reader.ReadToEnd();
                     m_reader.Close();
                 }
@@ -32,7 +32,7 @@ public class MyLogger
                     buff = "";
                 }
 
-                var m_write = MyAPIGateway.Utilities.WriteFileInLocalStorage("log", typeof(MyLogger));
+                var m_write = MyAPIGateway.Utilities.WriteFileInLocalStorage("logger.log", typeof(MyLogger));
                 m_write.Write(buff);
                 m_write.Write(logBuff);
                 m_write.Close();
