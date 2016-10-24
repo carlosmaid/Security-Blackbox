@@ -63,6 +63,7 @@ public class SecurityCore : MyGameLogicComponent
                 MyAPIGateway.Players.GetPlayers(players, p => sphere.Contains(p.GetPosition()) == VRageMath.ContainmentType.Contains);
 
                 bool isFriendly = false;
+                bool isNotFriendly = false;
 
                 foreach (IMyPlayer player in players)
                 {
@@ -71,6 +72,10 @@ public class SecurityCore : MyGameLogicComponent
                         if (player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.FactionShare || player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.Owner)
                         {
                             isFriendly = true;
+                        }
+                        else
+                        {
+                            isNotFriendly = true;
                         }
                     }
                 }
@@ -91,7 +96,7 @@ public class SecurityCore : MyGameLogicComponent
                     }
                 }
 
-                if (haveBLCFonctional && !isFriendly)
+                if (haveBLCFonctional && isNotFriendly)
                 {
                     foreach (IMyPlayer player in players)
                     {
@@ -130,11 +135,17 @@ public class SecurityCore : MyGameLogicComponent
                     return;
 
                 bool isFriendly = false;
+                bool isNotFriendly = false;
+
                 foreach (long owner in grid.BigOwners)
                 {
                     if (player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.FactionShare || player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.Owner)
                     {
                         isFriendly = true;
+                    }
+                    else
+                    {
+                        isNotFriendly = true;
                     }
                 }
 
@@ -152,7 +163,7 @@ public class SecurityCore : MyGameLogicComponent
                     }
                 }
 
-                if (haveBLCFonctional && !isFriendly)
+                if (haveBLCFonctional && isNotFriendly)
                 {
                     if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
                     {
