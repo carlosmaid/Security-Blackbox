@@ -44,7 +44,7 @@ public class SecurityCore : MyGameLogicComponent
         {
             try
             {
-                //MyLogger.logger("One block added"); // logger debug
+                MyLogger.logger("One block added"); // logger debug
 
                 IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
 
@@ -87,6 +87,7 @@ public class SecurityCore : MyGameLogicComponent
                     if (((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsWorking && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsFunctional)
                     {
                         haveBLCFonctional = true;
+                        break;
                     }
                 }
 
