@@ -1,178 +1,191 @@
-ï»¿using System;
-using System.Collections.Generic;
-using System.Text;
 using Sandbox.ModAPI;
-using Sandbox.ModAPI.Interfaces;
-using Sandbox.Common;
-// using Sandbox.Common.components;
-using Sandbox.Common.ObjectBuilders;
-using Sandbox.Common.ObjectBuilders.Definitions;
-using Sandbox.Game;
-using Sandbox.Game.Entities;
-using Sandbox.Game.Entities.Blocks;
-using Sandbox.Game.Entities.Character;
-using Sandbox.Game.World;
-using Sandbox.Definitions;
-using Sandbox.Engine;
-using SpaceEngineers.ObjectBuilders;
-using SpaceEngineers.ObjectBuilders.Definitions;
-using SpaceEngineers;
-using SpaceEngineers.Game;
-using VRage;
-using VRage.Game;
-using VRage.Game.Entity;
 using VRage.Game.Components;
-using VRage.Game.ModAPI;
 using VRage.ModAPI;
-using VRage.Game.ObjectBuilders;
 using VRage.ObjectBuilders;
-using SpaceEngineers.Game.ModAPI;
-using VRageMath;
+using System.Collections.Generic;
+using VRage.Game.ModAPI;
+using VRage.Game;
+using Sandbox.Common.ObjectBuilders;
+using System;
+using VRage;
 
+// Very thanks to Elsephire from Le grande nuage de magellan server for helping me with this mod.
 
-
-namespace spacelatino
+[MyEntityComponentDescriptor(typeof(MyObjectBuilder_CubeGrid))]
+public class SecurityCore : MyGameLogicComponent
 {
-    
+    private MyObjectBuilder_EntityBase builder;
 
+    private static string messageNotposeEN = "Cant build over a grid with an active security core, destroy it first !";
+    private static string messageNotposeFR = "Impossible de poser un bloc sur cette structure, détruisez l'active security core d'abord !";
+    private static string messageNotposeES = "No puedes construir sobre un grid enemigo con un security core activo, destruye el core primero !";
 
-    [MyEntityComponentDescriptor(typeof(MyObjectBuilder_Beacon))]
-    public class Exchangerlogic : MyGameLogicComponent
+    public override void Init(MyObjectBuilder_EntityBase objectBuilder)
+    {
+        builder = objectBuilder;
+        Entity.NeedsUpdate |= MyEntityUpdateEnum.BEFORE_NEXT_FRAME;
+    }
+
+    public override MyObjectBuilder_EntityBase GetObjectBuilder(bool copy = false)
+    {
+        return copy ? builder.Clone() as MyObjectBuilder_EntityBase : builder;
+    }
+
+    public override void UpdateOnceBeforeFrame()
+    {
+        base.UpdateOnceBeforeFrame();
+        ((IMyCubeGrid)Entity).OnBlockAdded += SecurityCore.OnBlockAdded;
+    }
+
+    public static void OnBlockAdded(IMySlimBlock block)
+    {
+        // Server
+        if (MyAPIGateway.Multiplayer.IsServer)
         {
-        VRage.ObjectBuilders.MyObjectBuilder_EntityBase m_objectBuilder = null;
-        private bool m_greeted = false;
-        IMyFunctionalBlock m_block;
-        public long OwnerId { get { return m_block.OwnerId; } }
-        public bool IsBeaconSecurity { get; private set; }
- 
-  
-        
-        public override void Close()
-        {
-
-        }
-
-        public override void Init(VRage.ObjectBuilders.MyObjectBuilder_EntityBase objectBuilder)
-        {
-            Entity.NeedsUpdate |= MyEntityUpdateEnum.EACH_10TH_FRAME;
-                        
-            m_objectBuilder = objectBuilder;
-            m_block = Entity as IMyFunctionalBlock;
-
-        }
-
-        public override void MarkForClose()
-        {
-        }
-
-        public override void UpdateAfterSimulation()
-        {
-        }
-
-        public override void UpdateAfterSimulation10()
-        {
-        }
-
-        public override void UpdateAfterSimulation100()
-        {
-        }
-
-        public override void UpdateBeforeSimulation()
-        {
-                  }
-
-        public override void UpdateBeforeSimulation10()
-        {
-            if (MyAPIGateway.Session.Player == null)
+            try
             {
-                return;
-            }
+                MyLogger.logger("One block added"); // logger debug
 
-            // si esta a menos de 3 metros
-            
-           if ((MyAPIGateway.Session.Player.GetPosition() - Entity.GetPosition()).Length() < 3f)
-            {
-              // si no fue saludado, tiene energia y esta a nombre de alguien
-               if (!m_greeted && IsPowered && m_block.OwnerId != 0)
-                {
-                   // Itera por todos los players 
-                   List<IMyPlayer> players = new List<IMyPlayer>();
-                MyAPIGateway.Players.GetPlayers(players, x => x.Controller != null && x.Controller.ControlledEntity != null);
+                IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
+
+                if (grid == null)
+                    return;
+
+                // Get position of the block
+                VRageMath.Vector3D position;
+                block.ComputeWorldCenter(out position);
+
+                // create the sphere
+                VRageMath.BoundingSphereD sphere = new VRageMath.BoundingSphereD(position, 15);
+
+                // find all players in the sphere
+                List<IMyPlayer> players = new List<IMyPlayer>();
+                MyAPIGateway.Players.GetPlayers(players, p => sphere.Contains(p.GetPosition()) == VRageMath.ContainmentType.Contains);
+
+                bool isFriendly = false;
+                bool isNotFriendly = false;
+
                 foreach (IMyPlayer player in players)
                 {
-                    // y comprueba si el beacon esta a nombre del jugador o de la faccion
-                    MyRelationsBetweenPlayerAndBlock relation = m_block.GetUserRelationToOwner(player.PlayerID);
-                    if (relation != MyRelationsBetweenPlayerAndBlock.Owner && relation != MyRelationsBetweenPlayerAndBlock.FactionShare)
-                        continue;
-                    // si el jugador es de la faccion entonces:
-
-                    // muestra un mensaje
-                    MyAPIGateway.Utilities.ShowMissionScreen("Titulo", "subtitulo", "", "Bla bla bla...");
-                    // setea el radio de transmision a 2000 metros
-                    TerminalPropertyExtensions.SetValueFloat((IMyFunctionalBlock)m_block, "Radius", 2000f);
-                    m_greeted = true;
+                    foreach (long owner in grid.BigOwners)
+                    {
+                        if (player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.FactionShare || player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.Owner)
+                        {
+                            isFriendly = true;
+                        }
+                        else
+                        {
+                            isNotFriendly = true;
+                        }
+                    }
                 }
-             }    
-                   
-            }   
-            
-           
-        }
 
-        public override void UpdateBeforeSimulation100()
-        {
-         
-              
-        }
+                List<IMySlimBlock> slimBlocks = new List<IMySlimBlock>();
 
-        public override void UpdateOnceBeforeFrame()
-        {
-        }
+                grid.GetBlocks(slimBlocks, b => b.FatBlock != null && b.FatBlock is IMyCubeBlock && b.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon) 
+                    && b.FatBlock.BlockDefinition.SubtypeId.Contains("BlockSecurityBlackbox") && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsFunctional && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsWorking);
 
-        public override MyObjectBuilder_EntityBase GetObjectBuilder(bool copy = false)
-        {
-            return m_objectBuilder;
-        }
+                bool haveBLCFonctional = false;
 
-
-        public bool IsPowered
-        {
-            // esta funcion chequea si un grid tiene una fuente de energia activada
-            // ya sea un reactor, una bateria o un panel solar.
-            get
-            {
-                IMyCubeGrid grid = (IMyCubeGrid)Entity.GetTopMostParent();
-                if (grid == null)
-                    return false;
-
-                IMyGridTerminalSystem gridTerminal = MyAPIGateway.TerminalActionsHelper.GetTerminalSystemForGrid(grid);
-                List<IMyTerminalBlock> blocks = new List<IMyTerminalBlock>();
-                gridTerminal.GetBlocks(blocks);
-                foreach (var block in blocks)
+                foreach (IMySlimBlock oneBlock in slimBlocks)
                 {
-                    if (block is IMyReactor)
+                    if (((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsWorking && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsFunctional)
                     {
-                        if (block.IsWorking)
-                            return true;
-                    }
-
-                    var battery = block as IMyBatteryBlock;
-                    if (battery != null)
-                    {
-                        if (battery.CurrentStoredPower > 0f && battery.IsWorking)
-                            return true;
-                    }
-
-                    var solar = block as IMySolarPanel;
-                    if (solar != null)
-                    {
-                        if (solar.IsWorking)
-                            return true;
+                        haveBLCFonctional = true;
+                        break;
                     }
                 }
-                return false;
-            }
-           }
 
+                if (haveBLCFonctional && isNotFriendly)
+                {
+                    foreach (IMyPlayer player in players)
+                    {
+                        if (!MyAPIGateway.Multiplayer.MultiplayerActive)
+                        {
+                            if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+
+                            else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain)
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                            else
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
+                        }
+                        MyLogger.logger(player.DisplayName + "a essaye de poser un block sur une cubegrid qui ne lui appartient pas"); // logger debug
+                    }
+
+                    (grid as IMyCubeGrid).RemoveBlock(block, true);
+                }
+            }
+            catch (Exception e)
+            {
+                MyLogger.logger("OnBlockAdded->Exception : " + e.ToString());
+            }
+        }
+        // Client
+        else
+        {
+            try
+            {
+                MyLogger.logger("One block added"); // logger debug
+
+                IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
+                IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
+
+                if (grid == null || player == null)
+                    return;
+
+                bool isFriendly = false;
+                bool isNotFriendly = false;
+
+                foreach (long owner in grid.BigOwners)
+                {
+                    if (player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.FactionShare || player.GetRelationTo(owner) == MyRelationsBetweenPlayerAndBlock.Owner)
+                    {
+                        isFriendly = true;
+                    }
+                    else
+                    {
+                        isNotFriendly = true;
+                    }
+                }
+
+                List<IMySlimBlock> slimBlocks = new List<IMySlimBlock>();
+                grid.GetBlocks(slimBlocks, b => b.FatBlock != null && b.FatBlock is IMyCubeBlock && b.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon)
+                    && b.FatBlock.BlockDefinition.SubtypeId.Contains("BlockSecurityBlackbox") && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsFunctional && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsWorking);
+
+                bool haveBLCFonctional = false;
+                foreach (IMySlimBlock oneBlock in slimBlocks)
+                {
+                    if (((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsWorking && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)oneBlock.FatBlock).IsFunctional)
+                    {
+                        haveBLCFonctional = true;
+                        break;
+                    }
+                }
+
+                if (haveBLCFonctional && isNotFriendly)
+                {
+                    if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
+                    {
+                        MyLogger.logger(messageNotposeFR); // logger debug
+                        MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                    }
+                    else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain)
+                    {
+                        MyLogger.logger(messageNotposeES); // logger debug
+                        MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                    }
+                    else
+                    {
+                        MyLogger.logger(messageNotposeEN); // logger debug
+                        MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                MyLogger.logger("OnBlockAdded->Exception : " + e.ToString());
+            }
+        }
     }
 }
