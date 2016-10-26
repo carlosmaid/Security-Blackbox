@@ -51,7 +51,7 @@ public class SecurityCore : MyGameLogicComponent
         {
             try
             {
-                MyLogger.logger("Server: One block added"); // logger debug
+                MyLogger.logger("Server: One block added"); //  logger debug
 
                 IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
 
@@ -129,11 +129,17 @@ public class SecurityCore : MyGameLogicComponent
             }
         }
         // Client
-        else if (MyAPIGateway.Session.Player != null)
-        {
+        else 
+            {
+            if (MyAPIGateway.Session.Player == null)
+            {
+            MyLogger.logger("Client: One block added - but session not ready"); // logger debug
+            return;
+            }
+
             try
             {
-                MyLogger.logger("Client: One block added"); // logger debug
+                MyLogger.logger("Client: One block added - session ready"); // logger debug
 
                 IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
                 IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
