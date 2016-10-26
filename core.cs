@@ -112,8 +112,8 @@ public class SecurityCore : MyGameLogicComponent
                             if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
                                 MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
 
-                            else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain)
-                                MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                            else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain || MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_HispanicAmerica)
+                                MyAPIGateway.Utilities.ShowNotification(messageNotposeES, 5000, MyFontEnum.Red);
                             else
                                 MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
                         }
