@@ -47,7 +47,7 @@ public class SecurityCore : MyGameLogicComponent
     public static void OnBlockAdded(IMySlimBlock block)
     {
         // Server
-        if (MyAPIGateway.Multiplayer.IsServer) //|| MyAPIGateway.Session.OnlineMode == MyOnlineModeEnum.OFFLINE
+        if (MyAPIGateway.Multiplayer.IsServer) //|| local MyAPIGateway.Session.OnlineMode == MyOnlineModeEnum.OFFLINE
         {
             try
             {
