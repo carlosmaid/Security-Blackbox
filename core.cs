@@ -17,7 +17,7 @@ public class SecurityCore : MyGameLogicComponent
     private MyObjectBuilder_EntityBase builder;
 
     private static string messageNotposeEN = "Cant build over a grid with an active security core, destroy it first !";
-    private static string messageNotposeFR = "Impossible de poser un bloc sur cette structure, détruisez l'active security core d'abord !";
+    private static string messageNotposeFR = "Impossible de poser un bloc sur cette structure, dÃ©truisez l'active security core d'abord !";
     private static string messageNotposeES = "No puedes construir sobre un grid enemigo con un security core activo, destruye el core primero !";
 
     public override void Init(MyObjectBuilder_EntityBase objectBuilder)
@@ -33,6 +33,13 @@ public class SecurityCore : MyGameLogicComponent
 
     public override void UpdateOnceBeforeFrame()
     {
+        if (MyAPIGateway.Session == null || MyAPIGateway.Utilities == null || MyAPIGateway.Multiplayer == null)
+        {
+            MyLogger.logger("Api Not ready");
+            return;
+        }
+
+
         base.UpdateOnceBeforeFrame();
         ((IMyCubeGrid)Entity).OnBlockAdded += SecurityCore.OnBlockAdded;
     }
@@ -40,11 +47,11 @@ public class SecurityCore : MyGameLogicComponent
     public static void OnBlockAdded(IMySlimBlock block)
     {
         // Server
-        if (MyAPIGateway.Multiplayer.IsServer)
+        if (MyAPIGateway.Multiplayer.IsServer) //|| MyAPIGateway.Session.OnlineMode == MyOnlineModeEnum.OFFLINE
         {
             try
             {
-                MyLogger.logger("One block added"); // logger debug
+                MyLogger.logger("Server: One block added"); // logger debug
 
                 IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
 
@@ -83,7 +90,7 @@ public class SecurityCore : MyGameLogicComponent
                 List<IMySlimBlock> slimBlocks = new List<IMySlimBlock>();
 
                 grid.GetBlocks(slimBlocks, b => b.FatBlock != null && b.FatBlock is IMyCubeBlock && b.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon) 
-                    && b.FatBlock.BlockDefinition.SubtypeId.Contains("BlockSecurityBlackbox") && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsFunctional && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsWorking);
+                    && b.FatBlock.BlockDefinition.SubtypeId.Contains("Beacon") && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsFunctional && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsWorking);
 
                 bool haveBLCFonctional = false;
 
@@ -110,7 +117,7 @@ public class SecurityCore : MyGameLogicComponent
                             else
                                 MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
                         }
-                        MyLogger.logger(player.DisplayName + "a essaye de poser un block sur une cubegrid qui ne lui appartient pas"); // logger debug
+                        MyLogger.logger("Server: "+ player.DisplayName + " a essaye de poser un block sur une cubegrid qui ne lui appartient pas"); // logger debug
                     }
 
                     (grid as IMyCubeGrid).RemoveBlock(block, true);
@@ -118,15 +125,15 @@ public class SecurityCore : MyGameLogicComponent
             }
             catch (Exception e)
             {
-                MyLogger.logger("OnBlockAdded->Exception : " + e.ToString());
+                MyLogger.logger("Server: OnBlockAdded->Exception : " + e.ToString());
             }
         }
         // Client
-        else
+        else if (MyAPIGateway.Session.Player != null)
         {
             try
             {
-                MyLogger.logger("One block added"); // logger debug
+                MyLogger.logger("Client: One block added"); // logger debug
 
                 IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
                 IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
@@ -151,7 +158,7 @@ public class SecurityCore : MyGameLogicComponent
 
                 List<IMySlimBlock> slimBlocks = new List<IMySlimBlock>();
                 grid.GetBlocks(slimBlocks, b => b.FatBlock != null && b.FatBlock is IMyCubeBlock && b.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon)
-                    && b.FatBlock.BlockDefinition.SubtypeId.Contains("BlockSecurityBlackbox") && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsFunctional && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsWorking);
+                    && b.FatBlock.BlockDefinition.SubtypeId.Contains("Beacon") && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsFunctional && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsWorking);
 
                 bool haveBLCFonctional = false;
                 foreach (IMySlimBlock oneBlock in slimBlocks)
@@ -165,6 +172,8 @@ public class SecurityCore : MyGameLogicComponent
 
                 if (haveBLCFonctional && isNotFriendly)
                 {
+                    MyLogger.logger("Client: llego a la comprobacion : " + messageNotposeES);
+                    
                     if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
                     {
                         MyLogger.logger(messageNotposeFR); // logger debug
@@ -184,7 +193,7 @@ public class SecurityCore : MyGameLogicComponent
             }
             catch (Exception e)
             {
-                MyLogger.logger("OnBlockAdded->Exception : " + e.ToString());
+                MyLogger.logger("Client: OnBlockAdded->Exception : " + e.ToString());
             }
         }
     }
