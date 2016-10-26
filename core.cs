@@ -179,10 +179,10 @@ public class SecurityCore : MyGameLogicComponent
                         MyLogger.logger(messageNotposeFR); // logger debug
                         MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
                     }
-                    else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain)
+                    else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain || MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_HispanicAmerica)
                     {
                         MyLogger.logger(messageNotposeES); // logger debug
-                        MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                        MyAPIGateway.Utilities.ShowNotification(messageNotposeES, 5000, MyFontEnum.Red);
                     }
                     else
                     {
