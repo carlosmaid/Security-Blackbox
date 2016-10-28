@@ -129,14 +129,8 @@ public class SecurityCore : MyGameLogicComponent
             }
         }
         // Client
-        else 
-            {
-            if (MyAPIGateway.Session.Player == null)
-            {
-            MyLogger.logger("Client: One block added - but session not ready"); // logger debug
-            return;
-            }
-
+        else
+        {
             try
             {
                 MyLogger.logger("Client: One block added - session ready"); // logger debug
@@ -179,7 +173,7 @@ public class SecurityCore : MyGameLogicComponent
                 if (haveBLCFonctional && isNotFriendly)
                 {
                     MyLogger.logger("Client: llego a la comprobacion : " + messageNotposeES);
-                    
+
                     if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
                     {
                         MyLogger.logger(messageNotposeFR); // logger debug
