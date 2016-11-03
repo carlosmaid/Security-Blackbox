@@ -42,7 +42,7 @@ public class MyLogger
         }
         catch
         {
-            MyLogger.logger("ERREUR : Logger : ");
+
         }
     }
 }
