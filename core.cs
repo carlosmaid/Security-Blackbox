@@ -73,7 +73,7 @@ public class SecurityCore : MyGameLogicComponent
 
         // Server
         // if (MyAPIGateway.Multiplayer.IsServer) //|| local MyAPIGateway.Session.OnlineMode == MyOnlineModeEnum.OFFLINE
-           if (IsServer)
+        if (IsServer)
         {
             try
             {
@@ -115,7 +115,7 @@ public class SecurityCore : MyGameLogicComponent
 
                 List<IMySlimBlock> slimBlocks = new List<IMySlimBlock>();
 
-                grid.GetBlocks(slimBlocks, b => b.FatBlock != null && b.FatBlock is IMyCubeBlock && b.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon) 
+                grid.GetBlocks(slimBlocks, b => b.FatBlock != null && b.FatBlock is IMyCubeBlock && b.FatBlock.BlockDefinition.TypeId == typeof(MyObjectBuilder_Beacon)
                     && b.FatBlock.BlockDefinition.SubtypeId.Contains("Beacon") && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsFunctional && ((Sandbox.ModAPI.Ingame.IMyFunctionalBlock)b.FatBlock).IsWorking);
 
                 bool haveBLCFonctional = false;
@@ -143,7 +143,7 @@ public class SecurityCore : MyGameLogicComponent
                             else
                                 MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
                         }
-                       // MyLogger.logger("Server: "+ player.DisplayName + " a essaye de poser un block sur une cubegrid qui ne lui appartient pas"); // logger debug
+                        // MyLogger.logger("Server: "+ player.DisplayName + " a essaye de poser un block sur une cubegrid qui ne lui appartient pas"); // logger debug
                     }
 
                     (grid as IMyCubeGrid).RemoveBlock(block, true);
@@ -159,11 +159,11 @@ public class SecurityCore : MyGameLogicComponent
         {
             try
             {
-                
+
 
                 IMyCubeGrid grid = block.CubeGrid as IMyCubeGrid;
                 IMyPlayer player = MyAPIGateway.Session.LocalHumanPlayer;
-                
+
                 if (grid == null || player == null)
                     return;
 
@@ -205,28 +205,28 @@ public class SecurityCore : MyGameLogicComponent
                 if (haveBLCFonctional && isNotFriendly)
                 {
                     //MyLogger.logger("Client: llego a la comprobacion : " + messageNotposeES);
-                    
-                  IMyPlayer actualplayer = MyAPIGateway.Session.Player;
-                  if (actualplayer != null) // check this for dedicated servers
-                   {
 
-                    if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
+                    IMyPlayer actualplayer = MyAPIGateway.Session.Player;
+                    if (actualplayer != null) // check this for dedicated servers
                     {
-                        MyLogger.logger(messageNotposeFR); // logger debug
-                        MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+
+                        if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.French)
+                        {
+                            MyLogger.logger(messageNotposeFR); // logger debug
+                            MyAPIGateway.Utilities.ShowNotification(messageNotposeFR, 5000, MyFontEnum.Red);
+                        }
+                        else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain ||
+                            MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_HispanicAmerica)
+                        {
+                            MyLogger.logger(messageNotposeES); // logger debug
+                            MyAPIGateway.Utilities.ShowNotification(messageNotposeES, 5000, MyFontEnum.Red);
+                        }
+                        else
+                        {
+                            MyLogger.logger(messageNotposeEN); // logger debug
+                            MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
+                        }
                     }
-                    else if (MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_Spain || 
-                        MyAPIGateway.Session.Config.Language == MyLanguagesEnum.Spanish_HispanicAmerica)
-                    {
-                        MyLogger.logger(messageNotposeES); // logger debug
-                        MyAPIGateway.Utilities.ShowNotification(messageNotposeES, 5000, MyFontEnum.Red);
-                    }
-                    else
-                    {
-                        MyLogger.logger(messageNotposeEN); // logger debug
-                        MyAPIGateway.Utilities.ShowNotification(messageNotposeEN, 5000, MyFontEnum.Red);
-                    }
-                   }
                 }
 
             }
@@ -244,26 +244,26 @@ public class SecurityCore : MyGameLogicComponent
         try
         {
             MyLogger.logger(" Damage Handler TARGET:" + target + " AMOUNT:" + info.Amount + " TYPE:" + info.Type + " ATTACKERID:" + info.AttackerId);
-            
+
             IMySlimBlock targetBlock = target as IMySlimBlock;
             if (targetBlock == null)
                 MyLogger.logger("targetblock null");
-                return;
+            return;
 
             MyCubeGrid targetGrid = targetBlock.CubeGrid as MyCubeGrid;
             if (targetGrid == null)
                 MyLogger.logger("targetgrid null");
-                return;
+            return;
 
-         /*
-            if (!targetGrid.DestructibleBlocks)
-            {
-                MyLogger.logger(" Not destructable blocks: " + targetGrid.DestructibleBlocks);
-                info.Amount = 0f;
-            }
+            /*
+               if (!targetGrid.DestructibleBlocks)
+               {
+                   MyLogger.logger(" Not destructable blocks: " + targetGrid.DestructibleBlocks);
+                   info.Amount = 0f;
+               }
             
-          */
-            
+             */
+
             bool owner = false;
             IMyFunctionalBlock targetFunctionalBlock = targetBlock.FatBlock as IMyFunctionalBlock;
             IMyEntity attackerEntity;
@@ -276,7 +276,7 @@ public class SecurityCore : MyGameLogicComponent
                     IMyPlayer player = null;
                     if (attackerEntity is IMyShipGrinder)
                         player = MyAPIGateway.Players.GetPlayerControllingEntity(attackerEntity.GetTopMostParent());
-                                       
+
                     if (player == null)
                     {
                         List<IMyPlayer> players = new List<IMyPlayer>();
@@ -296,12 +296,12 @@ public class SecurityCore : MyGameLogicComponent
                             }
                         }
                     }
-                
-                        
-                        MyRelationsBetweenPlayerAndBlock relation = targetFunctionalBlock.GetUserRelationToOwner(player.IdentityId);
-                        MyLogger.logger(" relation " + relation + " is " + player.IdentityId + " == " + targetFunctionalBlock.OwnerId);
-                        owner = (relation == MyRelationsBetweenPlayerAndBlock.Owner || relation == MyRelationsBetweenPlayerAndBlock.FactionShare) ? true : false;
-         
+
+
+                    MyRelationsBetweenPlayerAndBlock relation = targetFunctionalBlock.GetUserRelationToOwner(player.IdentityId);
+                    MyLogger.logger(" relation " + relation + " is " + player.IdentityId + " == " + targetFunctionalBlock.OwnerId);
+                    owner = (relation == MyRelationsBetweenPlayerAndBlock.Owner || relation == MyRelationsBetweenPlayerAndBlock.FactionShare) ? true : false;
+
                     if (owner)
                     {
                         MyLogger.logger(" * Target: " + targetGrid.DisplayName + " accepted");
@@ -317,10 +317,10 @@ public class SecurityCore : MyGameLogicComponent
                 }
             }
 
-            
-         }
 
-         catch (Exception e)
+        }
+
+        catch (Exception e)
         {
             MyLogger.logger("Error: damage handler: " + e.Message);
         }
