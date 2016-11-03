@@ -268,7 +268,7 @@ public class SecurityCore : MyGameLogicComponent
              */
 
             bool owner = false;
-            IMyCubeBlock targetFunctionalBlock = targetBlock.FatBlock as IMyCubeBlock;
+            IMyFunctionalBlock targetFunctionalBlock = targetBlock.FatBlock as IMyFunctionalBlock;
             IMyEntity attackerEntity;
             MyLogger.logger(" targetFunctionalBlock: " + targetFunctionalBlock);
             if (targetFunctionalBlock != null && MyAPIGateway.Entities.TryGetEntityById(info.AttackerId, out attackerEntity))
