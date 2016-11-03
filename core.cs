@@ -247,14 +247,17 @@ public class SecurityCore : MyGameLogicComponent
 
             IMySlimBlock targetBlock = target as IMySlimBlock;
             if (targetBlock == null)
+            {
                 MyLogger.logger("targetblock null");
-            return;
+                return;
+            }
 
             MyCubeGrid targetGrid = targetBlock.CubeGrid as MyCubeGrid;
             if (targetGrid == null)
+                {
                 MyLogger.logger("targetgrid null");
-            return;
-
+                return;
+               } 
             /*
                if (!targetGrid.DestructibleBlocks)
                {
@@ -265,7 +268,7 @@ public class SecurityCore : MyGameLogicComponent
              */
 
             bool owner = false;
-            IMyFunctionalBlock targetFunctionalBlock = targetBlock.FatBlock as IMyFunctionalBlock;
+            IMyCubeBlock targetFunctionalBlock = targetBlock.FatBlock as IMyCubeBlock;
             IMyEntity attackerEntity;
             MyLogger.logger(" targetFunctionalBlock: " + targetFunctionalBlock);
             if (targetFunctionalBlock != null && MyAPIGateway.Entities.TryGetEntityById(info.AttackerId, out attackerEntity))
