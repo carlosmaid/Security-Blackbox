@@ -17,7 +17,7 @@ public class MyLogger
     {
         try
         {
-            logBuff += String.Format("{0:dd/MM/yyyy HH:mm:ss}", DateTime.Now) + " - " + newLog + "\n";
+            logBuff += String.Format("{0:dd/MM/yyyy HH:mm:ss}", DateTime.Now) + " - " + newLog + Environment.NewLine;
             if ((DateTime.Now - lastLog).TotalSeconds > 5)
             {
                 string buff = "";
@@ -33,7 +33,7 @@ public class MyLogger
                 }
 
                 var m_write = MyAPIGateway.Utilities.WriteFileInLocalStorage("logger.log", typeof(MyLogger));
-                m_write.Write(buff);
+                m_write.Write(buff + Environment.NewLine);
                 m_write.Write(logBuff);
                 m_write.Close();
                 logBuff = "";
